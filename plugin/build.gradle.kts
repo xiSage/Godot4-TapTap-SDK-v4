@@ -8,7 +8,7 @@ plugins {
 
 // TODO: Update value to your plugin's name.
 val pluginName = "GodotTapTapSDK"
-var tapVersion = "3.27.0"
+var tapVersion = "4.3.12"
 // TODO: Update value to match your plugin's package name.
 val pluginPackageName = "com.sakuya.godot_taptap"
 
@@ -41,14 +41,12 @@ android {
 dependencies {
     implementation("org.godotengine:godot:4.2.0.stable")
 
-    compileOnly(files("libs/TapBootstrap_$tapVersion.aar"))
-    compileOnly(files("libs/TapCommon_$tapVersion.aar"))
-    compileOnly(files("libs/TapLogin_$tapVersion.aar"))
-    compileOnly(files("libs/AntiAddiction_$tapVersion.aar"))
-    compileOnly(files("libs/AntiAddictionUI_$tapVersion.aar"))
-    compileOnly(files("libs/TapConnect_$tapVersion.aar"))
-    compileOnly(files("libs/TapMoment_$tapVersion.aar"))
-    compileOnly(files("libs/TapAD_3.16.3.25h1.aar"))
+    compileOnly(files("libs/TapAD_3.16.3.34_h1.aar"))
+    compileOnly("com.taptap.sdk:tap-core:$tapVersion")
+    compileOnly("com.taptap.sdk:tap-kit:$tapVersion")
+    compileOnly("com.taptap.sdk:tap-login:$tapVersion") // 登录
+    compileOnly("com.taptap.sdk:tap-moment:$tapVersion") // 内嵌动态
+    compileOnly("com.taptap.sdk:tap-compliance:$tapVersion") // 实名认证和防沉迷
 
     compileOnly("cn.leancloud:storage-android:8.2.19")
     compileOnly("cn.leancloud:realtime-android:8.2.19")
@@ -78,14 +76,7 @@ val copyReleaseAARToDemoAddons by tasks.registering(Copy::class) {
 val copyLibsAARToDemoAddons by tasks.registering(Copy::class) {
     description = "Copies the generated release AAR binary to the plugin's addons directory"
     from("libs")
-    include("TapBootstrap_$tapVersion.aar")
-    include("TapCommon_$tapVersion.aar")
-    include("TapLogin_$tapVersion.aar")
-    include("AntiAddiction_$tapVersion.aar")
-    include("AntiAddictionUI_$tapVersion.aar")
-    include("TapConnect_$tapVersion.aar")
-    include("TapMoment_$tapVersion.aar")
-    include("TapAD_3.16.3.25h1.aar")
+    include("TapAD_3.16.3.34_h1.aar")
     into("demo/addons/$pluginName/bin")
 }
 

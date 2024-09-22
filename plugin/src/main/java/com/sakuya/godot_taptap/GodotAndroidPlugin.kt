@@ -4,10 +4,10 @@ import android.util.Log
 import android.widget.Toast
 import com.sakuya.godot_taptap.taptap.GodotTapTap
 import com.sakuya.godot_taptap.taptap.TapAdNativeHelper
-import com.tapsdk.antiaddictionui.AntiAddictionUIKit
-import com.tapsdk.antiaddictionui.utils.ToastUtils
-import com.tapsdk.moment.TapMoment
-import com.tapsdk.tapad.TapAdNative
+import com.taptap.sdk.compilance.TapTapCompliance
+import com.taptap.sdk.compilance.TapTapComplianceCallback
+import com.taptap.sdk.moment.TapTapMoment
+
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.SignalInfo
@@ -24,7 +24,7 @@ class GodotAndroidPlugin(godot: Godot): GodotPlugin(godot) {
         return mutableSetOf(
             SignalInfo("onLoginResult",Integer::class.java,String::class.java),
             SignalInfo("onAntiAddictionCallback",Integer::class.java),
-            SignalInfo("onTapMomentCallBack",Integer::class.java),
+            SignalInfo("onTapMomentCallBack",Integer::class.java,String::class.java),
             SignalInfo("onRewardVideoAdCallBack",Integer::class.java)
         )
     }
@@ -40,32 +40,41 @@ class GodotAndroidPlugin(godot: Godot): GodotPlugin(godot) {
      * 初始化方法
      */
     @UsedByGodot
-    private fun init(clientId:String?,clientToken:String?,serverUrl:String?){
+    private fun init(clientId:String?,clientToken:String?){
         godotTapTap = GodotTapTap.build {
             this.clientId = clientId
             this.clientToken = clientToken
-            this.serverUrl = serverUrl
+            // this.serverUrl = serverUrl
         }
         activity?.let {
-            godotTapTap?.init(it){
-                AntiAddictionUIKit.setAntiAddictionCallback { code, extras ->
-                    // code == 500;   // 登录成功
-                    // code == 1000;  // 用户登出
-                    // code == 1001;  // 切换账号
-                    // code == 1030;  // 用户当前无法进行游戏
-                    // code == 1050;  // 时长限制
-                    // code == 9002;  // 实名过程中点击了关闭实名窗
-                    emitSignal("onAntiAddictionCallback",code)
-                }
 
-                TapMoment.setCallback { code, msg ->
-                    if (code != null){
-                        emitSignal("onTapMomentCallBack",code)
+            godotTapTap?.init(it) {
+                TapTapCompliance.registerComplianceCallback(
+                    callback = object : TapTapComplianceCallback {
+
+                        override fun onComplianceResult(code: Int, extra: Map<String, Any>?) {
+                            // code == 500;   // 登录成功
+                            // code == 1000;  // 用户登出
+                            // code == 1001;  // 切换账号
+                            // code == 1030;  // 用户当前无法进行游戏
+                            // code == 1050;  // 时长限制
+                            // code == 9002;  // 实名过程中点击了关闭实名窗
+                            emitSignal("onAntiAddictionCallback", code)
+                        }
                     }
-                }
+                )
+            }
+
+                TapTapMoment.setCallback(
+                    callback = object : TapTapMoment.TapTapMomentCallback {
+                        override fun onCallback(code: Int, msg: String?) {
+                            // 根据 code 处理事件
+                            emitSignal("onTapMomentCallBack",code,msg)
+                        }
+                    }
+                )
             }
         }
-    }
 
     /**
      * 是否登录
@@ -110,7 +119,7 @@ class GodotAndroidPlugin(godot: Godot): GodotPlugin(godot) {
      */
     @UsedByGodot
     private fun quickCheck(userIdentifier:String){
-        AntiAddictionUIKit.startupWithTapTap(activity, userIdentifier)
+        activity?.let { TapTapCompliance.startup(it, userIdentifier) }
     }
 
     /**
@@ -118,31 +127,15 @@ class GodotAndroidPlugin(godot: Godot): GodotPlugin(godot) {
      */
     @UsedByGodot
     private fun antiExit(){
-        AntiAddictionUIKit.exit();
-    }
-
-    /**
-     * 切换测试模式
-     */
-    @UsedByGodot
-    private fun setTestEnvironment(enable:Boolean){
-        AntiAddictionUIKit.setTestEnvironment(activity, enable)
-    }
-
-    /**
-     * 设置悬浮窗口
-     */
-    @UsedByGodot
-    private fun setEntryVisible(enable:Boolean){
-        godotTapTap?.setEntryVisible(enable)
+        TapTapCompliance.exit();
     }
 
     /**
      * 打开内嵌动态
      */
     @UsedByGodot
-    private fun momentOpen(ori:Int = TapMoment.ORIENTATION_DEFAULT){
-        godotTapTap?.momentOpen(ori)
+    private fun momentOpen(){
+        godotTapTap?.momentOpen()
     }
 
     /**

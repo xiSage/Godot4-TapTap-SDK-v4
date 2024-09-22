@@ -1,28 +1,27 @@
 package com.sakuya.godot_taptap.taptap
 
 import android.app.Activity
+import android.content.res.TypedArray
 import android.util.Log
-import com.tapsdk.bootstrap.Callback
-import com.tapsdk.bootstrap.TapBootstrap
-import com.tapsdk.bootstrap.account.TDSUser
-import com.tapsdk.bootstrap.exceptions.TapError
-import com.tapsdk.moment.TapMoment
-import com.tapsdk.tapad.CustomUser
 import com.tapsdk.tapad.TapAdConfig
 import com.tapsdk.tapad.TapAdCustomController
-import com.tapsdk.tapad.TapAdLocation
 import com.tapsdk.tapad.TapAdManager
 import com.tapsdk.tapad.TapAdSdk
-import com.tapsdk.tapconnect.TapConnect
-import com.taptap.sdk.Profile
-import com.taptap.sdk.TapLoginHelper
-import com.tds.common.entities.TapAntiAddictionConfig
-import com.tds.common.entities.TapConfig
-import com.tds.common.models.TapRegionType
+import com.taptap.sdk.compilance.option.TapTapComplianceOptions
+import com.taptap.sdk.core.TapTapLanguage
+import com.taptap.sdk.core.TapTapRegion
+import com.taptap.sdk.core.TapTapSdk
+import com.taptap.sdk.core.TapTapSdkOptions
+import com.taptap.sdk.kit.internal.callback.TapTapCallback
+import com.taptap.sdk.kit.internal.exception.TapTapException
+import com.taptap.sdk.kit.internal.extensions.toJson
+import com.taptap.sdk.login.Scopes
+import com.taptap.sdk.login.TapTapAccount
+import com.taptap.sdk.login.TapTapLogin
+import com.taptap.sdk.moment.TapTapMoment
 
 class GodotTapTap(val clientId:String?,
-                  val clientToken:String?,
-                  val serverUrl: String?) {
+                  val clientToken:String?) {
 
     companion object {
         inline fun build(block: Builder.() -> Unit) = Builder().apply(block).build()
@@ -31,9 +30,9 @@ class GodotTapTap(val clientId:String?,
     class Builder {
         var clientId: String? = null
         var clientToken: String? = null
-        var serverUrl: String? = null
+        // var serverUrl: String? = null
 
-        fun build() = GodotTapTap(clientId,clientToken,serverUrl)
+        fun build() = GodotTapTap(clientId,clientToken)
     }
 
     /*
@@ -41,19 +40,26 @@ class GodotTapTap(val clientId:String?,
      */
     fun init(activity: Activity,block: () -> Unit){
         activity.runOnUiThread {
-
-            // TapAntiAddicitonConfig 构造方法中参数为是否显示切换账号
-            val tapAntiAddictionConfig = TapAntiAddictionConfig(true)
-
-            val tdsConfig = TapConfig.Builder()
-                .withAppContext(activity) // Context 上下文
-                .withClientId(clientId) // 必须，开发者中心对应 Client ID
-                .withClientToken(clientToken) // 必须，开发者中心对应 Client Token
-                .withServerUrl(serverUrl) // 必须，开发者中心 > 你的游戏 > 游戏服务 > 基本信息 > 域名配置 > API
-                .withRegionType(TapRegionType.CN) // TapRegionType.CN：中国大陆，TapRegionType.IO：其他国家或地区
-                .withAntiAddictionConfig(tapAntiAddictionConfig)
-                .build()
-            TapBootstrap.init(activity, tdsConfig)
+            TapTapSdk.init(
+                activity,
+                TapTapSdkOptions(
+                    clientId.toString(), // 游戏 Client ID
+                    clientToken.toString(), // 游戏 Client Token
+                    TapTapRegion.CN, // 游戏可玩区域: [TapTapRegion.CN]=国内 [TapTapRegion.GLOBAL]=海外
+                    "TapTap", // 分包渠道名称
+                    "1.0", // 游戏版本号
+                    false, // 是否自动上报 GooglePlay 内购支付成功事件 仅 [TapTapRegion.GLOBAL] 生效
+                    false, // 自定义字段是否能覆盖内置字段
+                    null, // 自定义属性，启动首个预置事件（device_login）会带上这些属性
+                    null, // OAID 证书, 用于上报 OAID 仅 [TapTapRegion.CN] 生效
+                    false, // 是否开启 log，建议 Debug 开启，Release 关闭，默认关闭 log
+                    TapTapLanguage.AUTO, // TapSDK 首选语言 默认为 TapTapLanguage.AUTO
+                ),
+                options = arrayOf(
+                // TapTapAchievementOptions(enableToast = true), // 成就初始化配置
+                TapTapComplianceOptions(showSwitchAccount = true, useAgeRange = true) // 合规认证初始化配置
+                )
+            )
 
             block()
         }
@@ -95,20 +101,34 @@ class GodotTapTap(val clientId:String?,
     是否登录
      */
     fun isLogin():Boolean{
-        return null != TDSUser.currentUser()
+        return TapTapLogin.getCurrentTapAccount() != null
     }
 
     fun login(activity: Activity,block:(String?) -> Unit){
-        TDSUser.loginWithTapTap(activity, object : Callback<TDSUser> {
-            override fun onSuccess(resultUser: TDSUser) {
-                block(resultUser.toJSONInfo())
-            }
+        val scopes = mutableSetOf<String>()
+        scopes.add(Scopes.SCOPE_PROFILE)
+        TapTapLogin.loginWithScopes(
+            activity,
+            scopes.toTypedArray(),
+            object : TapTapCallback<TapTapAccount> {
 
-            override fun onFail(error: TapError) {
-                Log.e("tap_login error",error.message.toString())
-                block(null)
+                override fun onSuccess(result: TapTapAccount) {
+                    // 成功
+                    block(result.toJson())
+                }
+
+                override fun onCancel() {
+                    // 取消
+                    block(null)
+                }
+
+                override fun onFail(exception: TapTapException) {
+                    // 失败
+                    Log.e("tap_login error", exception.message.toString())
+                    block(null)
+                }
             }
-        }, "public_profile")
+        )
     }
 
     /*
@@ -116,8 +136,8 @@ class GodotTapTap(val clientId:String?,
      */
     fun getCurrentProfile():String?{
         return try {
-            val profile: Profile = TapLoginHelper.getCurrentProfile()
-            profile.toJsonString()
+            val profile: TapTapAccount? = TapTapLogin.getCurrentTapAccount()
+            profile.toJson()
         }catch (e:Exception){
             null
         }
@@ -127,21 +147,13 @@ class GodotTapTap(val clientId:String?,
      * 登出
      */
     fun logOut(){
-        TDSUser.logOut()
-    }
-
-    /**
-     * 设置悬浮窗口
-     */
-    fun setEntryVisible(visible:Boolean){
-        TapConnect.setEntryVisible(visible)
+        TapTapLogin.logout()
     }
 
     /**
      * 打开内嵌动态
      */
-    fun momentOpen(ori:Int){
-        //使用指定屏幕方向
-        TapMoment.open(ori)
+    fun momentOpen(){
+        TapTapMoment.open()
     }
 }

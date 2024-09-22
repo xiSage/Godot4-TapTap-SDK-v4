@@ -11,7 +11,7 @@ func _ready():
 	#初始化
 	if Engine.has_singleton("GodotTapTapSDK"):
 		singleton = Engine.get_singleton("GodotTapTapSDK")
-		singleton.init("lwccao5wbryv5jvhfc","bSVA3KuDPr1eMvAcC4igiy4Ew8rUIlmffcDZmOon","https://sakuyaapi.zhangyongzhao.site")
+		singleton.init("lwccao5wbryv5jvhfc","bSVA3KuDPr1eMvAcC4igiy4Ew8rUIlmffcDZmOon")
 		singleton.onLoginResult.connect(self._onLoginResult)
 		singleton.onAntiAddictionCallback.connect(self._onAntiAddictionCallback)
 		singleton.onTapMomentCallBack.connect(self._onTapMomentCallBack)
@@ -26,8 +26,8 @@ func _onAntiAddictionCallback(code):
 		emit_signal("onAntiAddictionCallback",code)
 
 #内嵌动态回调
-func _onTapMomentCallBack(code):
-		emit_signal("onTapMomentCallBack",code)
+func _onTapMomentCallBack(code,msg):
+		emit_signal("onTapMomentCallBack",code,msg)
 
 #激励广告回调
 func _onRewardVideoAdCallBack(code):
@@ -68,8 +68,8 @@ func setEntryVisible(enable:bool):
 		singleton.setEntryVisible(enable)
 
 #打开内嵌动态
-func momentOpen(ori = -1):
-		singleton.momentOpen(ori)
+func momentOpen():
+		singleton.momentOpen()
 
 #初始化广告sdk
 func initAd(mediaId,mediaName,mediaKey):
