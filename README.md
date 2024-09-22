@@ -9,7 +9,8 @@ modified: '2024-01-09T14:05:35.170Z'
 
 此源码包括sdk与godot两部分的完整项目，下载后导入到4.2版本的引擎中便可使用。
 * 支持引擎版本：Godot 4.2+
-* TapTap SDK版本：3.27.0
+* TapTap SDK版本：4.3.12
+* TapADN SDK版本：3.16.3.34_h1
 
 ### 包含以下功能：
 * 一键登录
@@ -26,9 +27,9 @@ _________________
 ## 使用方法
 ### 初始化插件：
 
-修改addons/GodotTapTapSDK/GodotTapTap.gd中的三个参数，改成自己taptap游戏的，具体在tap开发者后台查看
+修改addons/GodotTapTapSDK/GodotTapTap.gd中的两个参数，改成自己taptap游戏的，具体在tap开发者后台查看
 ```
-singleton.init('client_id','client_token','server_url')
+singleton.init('client_id','client_token')
 ```
 
 ### 监听信号
@@ -57,7 +58,7 @@ signal onAntiAddictionCallback(code)
 50100	确认关闭所有动态界面（弹框点击确认按钮）
 60000	动态页面内登录成功
 70000	场景化入口回调
-signal onTapMomentCallBack(code)
+signal onTapMomentCallBack(code, msg)
 
 来自激励广告的信号
 500 == 广告加载失败
@@ -110,26 +111,12 @@ func antiExit()
 ```
 > #### 退出当前用户的防沉迷认证
 > - 无返回值
-
-```
-func setTestEnvironment(enable)
-```
-> #### 切换防沉迷模块是否为测试环境
-> - enable bool值
-
 _________________
 ### 动态模块
 ```
-func setEntryVisible(enable)
-```
-> #### 是否打开悬浮窗
-> - enable bool值
-
-```
-func momentOpen(ori)
+func momentOpen()
 ```
 > #### 打开内嵌动态
-> - ori int类型，-1默认，0横屏，1竖屏，2随陀螺仪旋转
 _________________
 ### 广告模块
 ```
