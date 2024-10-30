@@ -9,6 +9,8 @@ func _enter_tree():
 	export_plugin = AndroidExportPlugin.new()
 	add_export_plugin(export_plugin)
 	add_autoload_singleton("GodotTapTap","res://addons/GodotTapTapSDK/GodotTapTap.gd")
+	if type_exists("CSharpScript"):
+		add_autoload_singleton("GodotTapTapCSharp", "res://addons/GodotTapTapSDK/GodotTapTap.cs")
 
 
 func _exit_tree():

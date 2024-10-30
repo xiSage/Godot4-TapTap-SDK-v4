@@ -9,6 +9,8 @@ func _enter_tree():
 	export_plugin = AndroidExportPlugin.new()
 	add_export_plugin(export_plugin)
 	add_autoload_singleton("GodotTapTap","res://addons/GodotTapTapSDK/GodotTapTap.gd")
+	if type_exists("CSharpScript"):
+		add_autoload_singleton("GodotTapTapCSharp", "res://addons/GodotTapTapSDK/GodotTapTap.cs")
 
 
 func _exit_tree():
@@ -22,7 +24,7 @@ class AndroidExportPlugin extends EditorExportPlugin:
 	var _plugin_name = "GodotTapTapSDK"
 
 	var local_aar = [
-		_plugin_name + "/bin/TapAD_3.16.3.34_h1.aar"
+		_plugin_name + "/bin/TapAD_3.16.3.37.aar"
 	]
 
 	func _supports_platform(platform):
