@@ -142,5 +142,5 @@ GodotTapTap.Instance.TapLogin();
 ```
 连接信号:
 ```
-GodotTapTap,Instance.OnLoginResult += LoginCallback;
+GodotTapTap.Instance.OnLoginResult += LoginCallback;
 ```
