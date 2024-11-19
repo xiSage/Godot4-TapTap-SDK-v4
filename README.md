@@ -1,16 +1,6 @@
----
-tags: [Import-8d9d]
-title: Godot4 TapTap SDK 使用说明
-created: '2024-01-09T14:00:17.972Z'
-modified: '2024-01-09T14:05:35.170Z'
----
-
 # Godot4 TapTap SDK 使用说明
 
-此源码包括sdk与godot两部分的完整项目，下载后导入到4.2版本的引擎中便可使用。
-* 支持引擎版本：Godot 4.2+
-* TapTap SDK版本：4.3.12
-* TapADN SDK版本：3.16.3.34_h1
+此源码包括sdk与godot两部分的完整项目，下载后导入到高于4.2版本的引擎中便可使用。
 
 ### 包含以下功能：
 * 一键登录
@@ -31,6 +21,7 @@ _________________
 ```
 singleton.init('client_id','client_token')
 ```
+无论是否使用 C# 绑定，都应该在 GodotTapTap.gd 中修改上述参数。
 
 ### 监听信号
 ```
@@ -138,5 +129,18 @@ func initRewardVideoAd(spaceId,rewardName,extraInfo,userId)
 func showRewardVideoAd()
 ```
 > #### 播放激励广告
-点击加入Godot交流群：<a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=W4HFsixrp21iVio3jhmalbDgyiuKuVZO&jump_from=webapi&authKey=1qoGS3eG8/2Tx2o4xqfuXERjwR5WuD3eGNPTykoPPeOF97xrkue62ly5utMvn9Aa"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Godot引擎交流群" title="Godot引擎交流群"></a>
-或手动搜索：722737499
+
+## C# 绑定说明
+
+C# 绑定的实现在插件目录下的 GodotTapTap.cs 中，当使用 .Net 版本 Godot 并启用插件时，GodotTapTap.cs 会与 GodotTapTap.gd 一起注册为自动加载脚本。
+
+C# 的方法和信号名称与 GDScript 一一对应，并按照 C# 的习惯命名规则修改命名。
+
+C# 自动加载脚本实例的获取方法是 GodotTapTap.Instance。例如，调用登录模块：
+```
+GodotTapTap.Instance.TapLogin();
+```
+连接信号:
+```
+GodotTapTap.Instance.OnLoginResult += LoginCallback;
+```
