@@ -12,7 +12,6 @@ func _enter_tree():
 	if type_exists("CSharpScript"):
 		add_autoload_singleton("GodotTapTapCSharp", "res://addons/GodotTapTapSDK/GodotTapTap.cs")
 
-
 func _exit_tree():
 	# Clean-up of the plugin goes here.
 	remove_export_plugin(export_plugin)
@@ -20,11 +19,13 @@ func _exit_tree():
 
 
 class AndroidExportPlugin extends EditorExportPlugin:
-	# TODO: Update to your plugin's name.
 	var _plugin_name = "GodotTapTapSDK"
 
+	var sdk_version = "4.5.0"
+	var adn_version = "3.16.3.40"
+
 	var local_aar = [
-		_plugin_name + "/bin/TapAD_3.16.3.34_h1.aar"
+		_plugin_name + "/bin/TapAD_" + adn_version + ".aar",
 	]
 
 	func _supports_platform(platform):
@@ -44,16 +45,21 @@ class AndroidExportPlugin extends EditorExportPlugin:
 	func _get_android_dependencies(platform: EditorExportPlatform, debug: bool) -> PackedStringArray:
 		return PackedStringArray(
 			[
-				"com.taptap.sdk:tap-core:4.3.12",
-				"com.taptap.sdk:tap-kit:4.3.12",
-				"com.taptap.sdk:tap-login:4.3.12",
-				"com.taptap.sdk:tap-moment:4.3.12",
-				"com.taptap.sdk:tap-compliance:4.3.12",
+				"com.taptap.sdk:tap-core:" + sdk_version,
+				"com.taptap.sdk:tap-kit:" + sdk_version,
+				"com.taptap.sdk:tap-login:" + sdk_version,
+				"com.taptap.sdk:tap-moment:" + sdk_version,
+				"com.taptap.sdk:tap-compliance:" + sdk_version,
 				"cn.leancloud:storage-android:8.2.19",
 				"cn.leancloud:realtime-android:8.2.19",
 				"com.squareup.okhttp3:okhttp:3.12.1",
 				"com.android.support:support-annotations:28.0.0",
-				"com.github.bumptech.glide:glide:4.9.0"
+				"com.github.bumptech.glide:glide:4.9.0",
+				"io.reactivex.rxjava2:rxandroid:2.0.1",
+				"io.reactivex.rxjava2:rxjava:2.0.1",
+				"com.android.support:appcompat-v7:28.0.0",
+				"com.android.support:support-v4:28.0.0",
+				"com.android.support:recyclerview-v7:28.0.0"
 			]
 		)
 		

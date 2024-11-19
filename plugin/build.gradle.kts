@@ -9,10 +9,10 @@ plugins {
 
 // TODO: Update value to your plugin's name.
 val pluginName = "GodotTapTapSDK"
-var tapVersion = "4.4.3"
+var tapVersion = "4.5.0"
 // TODO: Update value to match your plugin's package name.
 val pluginPackageName = "com.sakuya.godot_taptap"
-val adnFileName = "TapAD_3.16.3.37.aar"
+val adnFileName = "TapAD_3.16.3.40.aar"
 
 android {
     namespace = pluginPackageName
